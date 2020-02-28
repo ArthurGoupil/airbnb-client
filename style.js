@@ -37,7 +37,7 @@ export default StyleSheet.create({
   },
   is16: {
     fontSize: 16,
-    lineHeight: 24
+    lineHeight: 22
   },
   is17: {
     fontSize: 17,
@@ -106,16 +106,11 @@ export default StyleSheet.create({
   // COMPONENTS STYLING
   // Input
   input: {
-    width: '80%',
-    paddingLeft: 5,
-    paddingRight: 5,
     paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'white'
+    borderBottomWidth: 1
   },
   // Button
   button: {
-    backgroundColor: 'white',
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 15,
@@ -199,5 +194,30 @@ export default StyleSheet.create({
   },
   viewPager: {
     height: 250
+  },
+  // Profile
+  profileContainer: {
+    padding: 20
+  },
+  profileImg: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    resizeMode: 'contain',
+    marginBottom: 20
+  },
+  longInputProfileScreen: {
+    width: '100%',
+    height: 96,
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingBottom: 8,
+    borderWidth: 1,
+    borderColor: mainRed,
+    marginTop: 10
+  },
+  updateDone: {
+    height: 50,
+    marginBottom: '3%'
   }
 });

@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, FlatList, Text, View } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FlatList } from 'react-native';
 import axios from 'axios';
 
 import s from '../style';
 
 import RoomBloc from '../components/RoomBloc';
+import Loader from '../components/Loader';
 
 export default function HomeScreen() {
   const [data, setData] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchData = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        'https://airbnb-api.herokuapp.com/api/room?city=paris'
+      );
+      setData(response.data.rooms);
+      setIsLoading(false);
+    } catch (e) {
+      console.log(e.message);
+    }
+  });
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          'https://airbnb-api.herokuapp.com/api/room?city=paris'
-        );
-        setData(response.data.rooms);
-        setIsLoading(false);
-      } catch (e) {
-        console.log(e.message);
-      }
-    };
     fetchData();
   }, []);
 
@@ -33,8 +35,6 @@ export default function HomeScreen() {
       renderItem={({ item }) => <RoomBloc {...item} />}
     />
   ) : (
-    <View style={[s.flex1, s.alignCenter, s.justifyCenter]}>
-      <ActivityIndicator size="large" color="#BBBBBB" />
-    </View>
+    <Loader />
   );
 }

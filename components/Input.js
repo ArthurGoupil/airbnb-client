@@ -3,13 +3,17 @@ import { TextInput } from 'react-native';
 import s from '../style';
 
 export default function Input({
+  width,
   placeholder,
   secureTextEntry,
   autoCapitalize,
   keyboardType,
   textContentType,
+  placeholderTextColor,
   onChangeText,
-  value
+  value,
+  textColor,
+  borderColor
 }) {
   return (
     <TextInput
@@ -18,8 +22,19 @@ export default function Input({
       textContentType={textContentType ? textContentType : 'none'}
       autoCapitalize={autoCapitalize ? autoCapitalize : 'none'}
       keyboardType={keyboardType ? keyboardType : 'default'}
-      placeholderTextColor="#F7A8A1"
-      style={[s.input, s.isWhite, s.is16]}
+      placeholderTextColor={
+        placeholderTextColor ? placeholderTextColor : '#F7A8A1'
+      }
+      style={[
+        s.input,
+        s.is16,
+        {
+          color: textColor ? textColor : 'white',
+          borderBottomColor: borderColor ? borderColor : 'white',
+          width: width ? width : '80%',
+          marginBottom: '3%'
+        }
+      ]}
       onChangeText={onChangeText}
       value={value}
     />

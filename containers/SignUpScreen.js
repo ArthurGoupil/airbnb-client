@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import {
   ActivityIndicator,
@@ -15,7 +15,7 @@ import LinkComponent from '../components/Link';
 
 import s from '../style';
 
-export default function SignUpScreen({ setToken }) {
+export default function SignUpScreen({ setToken, setId }) {
   const navigation = useNavigation();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -25,9 +25,10 @@ export default function SignUpScreen({ setToken }) {
   const [description, setDescription] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const handleSignup = async () => {
+  const handleSignup = useCallback(async () => {
+    setErrorMessage(null);
     setIsLoading(true);
     const fieldIsMissing =
       !email ||
@@ -43,7 +44,7 @@ export default function SignUpScreen({ setToken }) {
         setErrorMessage('The two indicated passwords are differents.');
       } else {
         const response = await axios.post(
-          'https://airbnb-api.herokuapp.com/api/user/sign_up',
+          'https://express-airbnb-api.herokuapp.com/user/sign_up',
           { email, username, name, description, password },
           {
             headers: {
@@ -51,15 +52,15 @@ export default function SignUpScreen({ setToken }) {
             }
           }
         );
+        setToken(response.data.token);
+        setId(response.data.id);
         setIsLoading(false);
-        const userToken = response.data.token;
-        setToken(userToken);
       }
     } catch (e) {
       console.log(e);
       setErrorMessage('An error occurred.');
     }
-  };
+  });
 
   return (
     <View style={[s.constants, s.bgIsRed, s.flex1, s.spaceAround]}>
@@ -124,7 +125,7 @@ export default function SignUpScreen({ setToken }) {
           <Text style={[s.isWhite, s.is16]}>{errorMessage}</Text>
         </View>
         <View style={[s.signinActionsContainer, s.alignCenter, s.spaceBetween]}>
-          {!isLoading ? (
+          {!isLoading || errorMessage ? (
             <ButtonComponent value="Sign up" onPress={handleSignup} />
           ) : (
             <ActivityIndicator size="large" color="white" />

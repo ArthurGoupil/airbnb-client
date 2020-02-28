@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ActivityIndicator, Platform, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Callout } from 'react-native-maps';
+import { useNavigation } from '@react-navigation/core';
 
 import axios from 'axios';
 
 import s from '../style';
 
+import Loader from '../components/Loader';
+
 export default function AroundMeScreen() {
+  const navigation = useNavigation();
+
   const [locationIsLoading, setLocationIsLoading] = useState(true);
   const [roomsAreLoading, setRoomsAreLoading] = useState(true);
   const [location, setLocation] = useState(null);
@@ -31,6 +36,18 @@ export default function AroundMeScreen() {
     }
   });
 
+  const fetchNearRooms = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `https://airbnb-api.herokuapp.com/api/room/around?latitude=${latitude}&longitude=${longitude}`
+      );
+      setNearRooms(response.data);
+      setRoomsAreLoading(false);
+    } catch (e) {
+      console.log(e.message);
+    }
+  });
+
   useEffect(() => {
     try {
       if (Platform.OS === 'android' && !Constants.isDevice) {
@@ -46,17 +63,6 @@ export default function AroundMeScreen() {
   }, []);
 
   useEffect(() => {
-    const fetchNearRooms = async () => {
-      try {
-        const response = await axios.get(
-          `https://airbnb-api.herokuapp.com/api/room/around?latitude=${latitude}&longitude=${longitude}`
-        );
-        setNearRooms(response.data);
-        setRoomsAreLoading(false);
-      } catch (e) {
-        console.log(e.message);
-      }
-    };
     fetchNearRooms();
   }, [location]);
 
@@ -78,15 +84,22 @@ export default function AroundMeScreen() {
         return (
           <MapView.Marker
             key={room._id}
-            title={room.title}
             coordinate={{ latitude: room.loc[1], longitude: room.loc[0] }}
-          />
+          >
+            <Callout
+              onPress={() => {
+                navigation.navigate('Room', { roomId: room._id });
+              }}
+            >
+              <Text>{room.title}</Text>
+            </Callout>
+          </MapView.Marker>
         );
       })}
     </MapView>
   ) : (
     <View style={[s.flex1, s.alignCenter, s.justifyCenter]}>
-      <ActivityIndicator size="large" color="#BBBBBB" />
+      {errorMessage ? <Text>{errorMessage}</Text> : <Loader />}
     </View>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/core';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import ViewPager from '@react-native-community/viewpager';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -10,6 +10,8 @@ import RenderImage from '../components/RenderImage';
 import RoomDetails from '../components/RoomDetails';
 
 import s from '../style';
+
+import Loader from '../components/Loader';
 
 export default function RoomScreen() {
   const { params } = useRoute();
@@ -89,8 +91,6 @@ export default function RoomScreen() {
       </View>
     </>
   ) : (
-    <View style={[s.flex1, s.alignCenter, s.justifyCenter]}>
-      <ActivityIndicator size="large" color="#BBBBBB" />
-    </View>
+    <Loader />
   );
 }

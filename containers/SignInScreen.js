@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import {
   ActivityIndicator,
@@ -15,19 +15,20 @@ import LinkComponent from '../components/Link';
 
 import s from '../style';
 
-export default function SignInScreen({ setToken, user, setUser }) {
+export default function SignInScreen({ setToken, setId }) {
   const navigation = useNavigation();
 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const handleSignin = async () => {
+  const handleSignin = useCallback(async () => {
+    setErrorMessage(null);
     setIsLoading(true);
     try {
       const response = await axios.post(
-        'https://airbnb-api.herokuapp.com/api/user/log_in',
+        'https://express-airbnb-api.herokuapp.com/user/log_in',
         { email, password },
         {
           headers: {
@@ -35,14 +36,14 @@ export default function SignInScreen({ setToken, user, setUser }) {
           }
         }
       );
-      setIsLoading(false);
       setToken(response.data.token);
-      setUser(response.data);
+      setId(response.data.id);
+      setIsLoading(false);
     } catch (e) {
       console.log(e.message);
       setErrorMessage('Wrong email or password.');
     }
-  };
+  });
 
   return (
     <View style={[s.constants, s.bgIsRed, s.flex1]}>
@@ -81,7 +82,7 @@ export default function SignInScreen({ setToken, user, setUser }) {
           <Text style={[s.isWhite, s.is16]}>{errorMessage}</Text>
         </View>
         <View style={[s.signinActionsContainer, s.alignCenter, s.spaceBetween]}>
-          {!isLoading ? (
+          {!isLoading || errorMessage ? (
             <ButtonComponent value="Sign in" onPress={handleSignin} />
           ) : (
             <ActivityIndicator size="large" color="white" />
