@@ -99,7 +99,7 @@ export default function SignUpScreen({ setToken, setId }) {
 
           <View style={s.longInput}>
             <TextInput
-              placeholder="tell us a few words about you."
+              placeholder="tell us a few words about you"
               autoCapitalize="sentences"
               placeholderTextColor="#F7A8A1"
               multiline
