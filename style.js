@@ -111,6 +111,7 @@ export default StyleSheet.create({
   },
   // Button
   button: {
+    minWidth: 100,
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 15,
@@ -203,7 +204,7 @@ export default StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 75,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
     marginBottom: 20
   },
   longInputProfileScreen: {
@@ -219,5 +220,31 @@ export default StyleSheet.create({
   updateDone: {
     height: 50,
     marginBottom: '3%'
+  },
+  profileImgContainer: {
+    position: 'relative'
+  },
+  profileImgEdit: {
+    position: 'absolute',
+    bottom: 5,
+    backgroundColor: mainRed,
+    padding: 8,
+    borderRadius: 50,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    elevation: 5
+  },
+  profileImgLoaderContainer: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 20,
+    backgroundColor: mainGrey
   }
 });

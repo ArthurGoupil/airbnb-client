@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+
 import HomeScreen from './containers/HomeScreen';
 import ProfileScreen from './containers/ProfileScreen';
 import SignInScreen from './containers/SignInScreen';

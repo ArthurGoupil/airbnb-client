@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ActivityIndicator, Image, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
 
 import axios from 'axios';
 
@@ -11,16 +22,60 @@ import InputComponent from '../components/Input';
 import ButtonComponent from '../components/Button';
 
 export default function ProfileScreen({ userToken, setToken, userId, setId }) {
+  // Get user data when opening screen
   const [user, setUser] = useState(null);
+  // Loading state for initial screen opening
   const [isLoading, setIsLoading] = useState(true);
+  // Loading state when updating
   const [updateIsLoading, setUpdateIsLoading] = useState(false);
+  // State used to know if update is done
   const [updateIsDone, setUpdateIsDone] = useState(false);
+  // error message when updating
   const [errorMessage, setErrorMessage] = useState(false);
 
+  // User data
   const [username, setUsername] = useState();
   const [name, setName] = useState();
   const [email, setEmail] = useState();
   const [description, setDescription] = useState();
+
+  // Photo upload states
+  const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleImagePicked = useCallback(async pickerResult => {
+    try {
+      setUploading(true);
+      if (!pickerResult.cancelled) {
+        const uri = pickerResult.uri;
+        const uriParts = uri.split('.');
+        const fileType = uriParts[uriParts.length - 1];
+        const formData = new FormData();
+        formData.append('photo', {
+          uri,
+          name: `photo.${fileType}`,
+          type: `image/${fileType}`
+        });
+
+        const uploadResult = await axios.put(
+          `https://express-airbnb-api.herokuapp.com/user/upload_picture/${userId}`,
+          formData,
+          {
+            headers: {
+              Authorization: 'Bearer ' + userToken,
+              Accept: 'application/json',
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        );
+        setImage(uploadResult.data.photo[0]);
+      }
+    } catch (e) {
+      console.log(e.message);
+    } finally {
+      setUploading(false);
+    }
+  });
 
   const fetchData = useCallback(async () => {
     try {
@@ -33,6 +88,7 @@ export default function ProfileScreen({ userToken, setToken, userId, setId }) {
       setName(response.data.name);
       setEmail(response.data.email);
       setDescription(response.data.description);
+      setImage(response.data.photo[0]);
       setIsLoading(false);
     } catch (e) {
       console.log(e.message);
@@ -73,19 +129,83 @@ export default function ProfileScreen({ userToken, setToken, userId, setId }) {
 
   return !isLoading ? (
     <KeyboardAwareScrollView style={[s.profileContainer]}>
-      <View>
-        {user.photo.length !== 0 ? (
-          <View style={s.alignCenter}>
-            <Image source={{ uri: user.photo[0].url }} style={s.profileImg} />
-          </View>
-        ) : (
-          <View style={s.alignCenter}>
+      <View style={[s.profileImgContainer, s.alignCenter]}>
+        <View style={s.alignCenter}>
+          {!uploading ? (
             <Image
-              source={require('../assets/images/user-default-image.png')}
+              source={
+                user.photo.length !== 0
+                  ? { uri: image.url }
+                  : require('../assets/images/user-default-image.png')
+              }
               style={s.profileImg}
             />
-          </View>
-        )}
+          ) : (
+            <View style={[s.profileImgLoaderContainer, s.justifyCenter]}>
+              <ActivityIndicator size="large" color="white" />
+            </View>
+          )}
+        </View>
+
+        <TouchableOpacity
+          style={s.profileImgEdit}
+          onPress={() => {
+            Alert.alert(
+              user.photo.length === 0
+                ? 'Upload your profile picture'
+                : 'Edit your profile picture',
+              '',
+              [
+                {
+                  text: 'Cancel',
+                  style: 'cancel'
+                },
+                {
+                  text: 'Take a photo',
+                  onPress: async () => {
+                    const cameraPerm = await Permissions.askAsync(
+                      Permissions.CAMERA
+                    );
+                    const cameraRollPerm = await Permissions.askAsync(
+                      Permissions.CAMERA_ROLL
+                    );
+                    // If user gives access to camera and camera roll
+                    if (
+                      cameraPerm.status === 'granted' &&
+                      cameraRollPerm.status === 'granted'
+                    ) {
+                      const pickerResult = await ImagePicker.launchCameraAsync({
+                        allowsEditing: true,
+                        aspect: [1, 1]
+                      });
+                      handleImagePicked(pickerResult);
+                    }
+                  }
+                },
+                {
+                  text: 'Pick an image from camera roll',
+                  onPress: async () => {
+                    const cameraRollPerm = await Permissions.askAsync(
+                      Permissions.CAMERA_ROLL
+                    );
+                    // If user gives access to camera roll
+                    if (cameraRollPerm.status === 'granted') {
+                      const pickerResult = await ImagePicker.launchImageLibraryAsync(
+                        {
+                          allowsEditing: true,
+                          aspect: [1, 1]
+                        }
+                      );
+                      handleImagePicked(pickerResult);
+                    }
+                  }
+                }
+              ]
+            );
+          }}
+        >
+          <MaterialIcons name={'edit'} size={25} color={'white'} />
+        </TouchableOpacity>
       </View>
       <View>
         <View>
